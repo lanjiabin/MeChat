@@ -106,8 +106,6 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences share = getSharedPreferences("user_info", MODE_PRIVATE);
         String user_id = share.getString("user_id", "");
-        String user_name = share.getString("user_name", "");
-        String user_phone = share.getString("user_phone", "");
         ArrayList<HashMap<String, String>> info = AddressDBService.getInstance().queryAddressByID(this, user_id);
         String sign = info.get(0).get("sign");
         if (sign.equals("个性签名")) {
@@ -115,8 +113,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             mSignEt.setText(sign);
         }
-        mNameTV.setText(user_name);
-        mPhoneV.setText("电话: " + user_phone);
+        mNameTV.setText(info.get(0).get("name"));
+        mPhoneV.setText("电话: " + info.get(0).get("phone"));
 
         initData(); //更新聊天列表
 
