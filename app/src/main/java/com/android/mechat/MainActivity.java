@@ -7,20 +7,24 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.mechat.DB.AddressDBService;
+import com.android.mechat.DB.MsgDBService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * 主页
@@ -28,8 +32,11 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity {
 
     RecyclerView mRecyclerView;
+    RecyclerView mChatRecyclerView;
     RecyclerAdapter mRecyclerAdapter;
+    ChatRecyclerAdapter mChatRecyclerAdapter;
     ArrayList<HashMap<String, String>> mAddressList;
+    ArrayList<HashMap<String, String>> mMsgAddressList; //查出所有聊天记录
 
     //底下的四个按钮
     Button mBtn1;
@@ -43,8 +50,14 @@ public class MainActivity extends AppCompatActivity {
     TextView mTv3;
     TextView mTv4;
 
-    RelativeLayout mMeRelative;
-    Button mCancelLogin;
+    RelativeLayout mMeRelative; // 我的 页面
+    Button mCancelLogin; //取消登陆
+    TextView mNameTV; //名字
+    TextView mPhoneV; //电话
+    EditText mSignEt; //个性签名
+
+    List<String> mMsgSend1;
+    ArrayList<HashMap<String, String>> mList; //聊天列表数据
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,11 +72,12 @@ public class MainActivity extends AppCompatActivity {
     public void initView() {
         //查询所有联系人
         mAddressList = AddressDBService.getInstance().queryAllAddress(this);
-
         //布局初始化
         mRecyclerView = findViewById(R.id.recyclerListView);
+        mChatRecyclerView = findViewById(R.id.chatRecyclerView);
         //设置布局方向
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mChatRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         //设置adapter关联的list
         mRecyclerAdapter = new RecyclerAdapter(this, mAddressList);
         //数据更新
@@ -84,8 +98,71 @@ public class MainActivity extends AppCompatActivity {
         mMeRelative = findViewById(R.id.me_relative);
         mCancelLogin = findViewById(R.id.cancel_login);
 
+        mNameTV = findViewById(R.id.user_name_tv);
+        mPhoneV = findViewById(R.id.phone_tv);
+        mSignEt = findViewById(R.id.sign_et);
+
         change1(); //默认选中按钮1
 
+        SharedPreferences share = getSharedPreferences("user_info", MODE_PRIVATE);
+        String user_id = share.getString("user_id", "");
+        String user_name = share.getString("user_name", "");
+        String user_phone = share.getString("user_phone", "");
+        ArrayList<HashMap<String, String>> info = AddressDBService.getInstance().queryAddressByID(this, user_id);
+        String sign = info.get(0).get("sign");
+        if (sign.equals("个性签名")) {
+            mSignEt.setText("");
+        } else {
+            mSignEt.setText(sign);
+        }
+        mNameTV.setText(user_name);
+        mPhoneV.setText("电话: " + user_phone);
+
+        initData(); //更新聊天列表
+
+    }
+
+    //聊天列表
+    public void initData() {
+        //查询所有聊天记录
+        mMsgAddressList = MsgDBService.getInstance().queryAllAddressMsg(this);
+        mMsgSend1 = new ArrayList<>();
+        if (mMsgAddressList.size() > 0) {
+            String[] array = new String[mMsgAddressList.size()];
+            for (int i = 0; i < mMsgAddressList.size(); i++) {
+                array[i] = mMsgAddressList.get(i).get("send1");
+            }
+
+            //查出有多少人和登陆用户聊过天
+            mMsgSend1 = contains(array);
+        }
+
+        //本地登陆的账户
+        SharedPreferences share2 = getSharedPreferences("user_info", MODE_PRIVATE);
+        String user_id2 = share2.getString("user_id", "");
+
+        mList = new ArrayList<HashMap<String, String>>();
+        for (int j = 0; j < mMsgSend1.size(); j++) {
+            HashMap<String, String> map = new HashMap<>();
+            for (int i = 0; i < mMsgAddressList.size(); i++) {
+                if (user_id2.equals(mMsgAddressList.get(i).get("send2"))
+                        && mMsgAddressList.get(i).get("send1").equals(mMsgSend1.get(j))) {
+                    map.put("id", mMsgAddressList.get(i).get("msgid"));
+                    map.put("msg", mMsgAddressList.get(i).get("msg"));
+                    String name = AddressDBService.getInstance().queryAddressByID(getApplicationContext(), mMsgAddressList.get(i).get("send1")).get(0).get("name");
+                    map.put("name", name);
+                    map.put("send1", mMsgAddressList.get(i).get("send1"));
+                    map.put("send2", mMsgAddressList.get(i).get("send2"));
+                    map.put("time", mMsgAddressList.get(i).get("time"));
+                }
+
+            }
+            mList.add(map);
+        }
+
+        mChatRecyclerAdapter = new ChatRecyclerAdapter(this, mList);
+        mChatRecyclerAdapter.notifyDataSetChanged();
+        mChatRecyclerView.setAdapter(mChatRecyclerAdapter);
     }
 
     //点击事件
@@ -94,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.addOnItemTouchListener(new RecyclerViewClickListener(this, mRecyclerView, new RecyclerViewClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Toast.makeText(MainActivity.this, "点击了：" + position, Toast.LENGTH_SHORT).show();
 
                 SharedPreferences share = getSharedPreferences("user_info", MODE_PRIVATE);
                 String user_id1 = mAddressList.get(position).get("id");
@@ -115,6 +191,54 @@ public class MainActivity extends AppCompatActivity {
             public void onItemLongClick(View view, int position) {
             }
         }));
+
+        //聊天页面列表点击事件
+        mChatRecyclerView.addOnItemTouchListener(new RecyclerViewClickListener(this, mChatRecyclerView, new RecyclerViewClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+
+                SharedPreferences share = getSharedPreferences("user_info", MODE_PRIVATE);
+                String user_id1 = mList.get(position).get("send1");
+                String user_id2 = share.getString("user_id", "");
+
+                Intent intent = new Intent(MainActivity.this, MsgActivity.class);
+                intent.putExtra("send1", user_id1); //收件人
+                intent.putExtra("send2", user_id2); //发件人
+
+                if (user_id1 == null || user_id2 == null || user_id1.equals("") || user_id2.equals("")) {
+                    return;
+                }
+
+                startActivity(intent);
+            }
+
+            @Override
+            public void onItemLongClick(View view, int position) {
+
+            }
+        }));
+
+
+        mSignEt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                //文字输入完毕后，自动更新个性签名
+                SharedPreferences share = getSharedPreferences("user_info", MODE_PRIVATE);
+                String user_id = share.getString("user_id", "");
+                AddressDBService.getInstance().updateAddressByID(getApplicationContext(), user_id, editable.toString());
+
+            }
+        });
 
 
         mBtn1.setOnClickListener(new View.OnClickListener() {
@@ -188,6 +312,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    //去掉重复元素
+    public List<String> contains(String[] array) {
+        List<String> list = new ArrayList<String>();
+        for (int i = 0; i < array.length; i++) {
+            if (!list.contains(array[i])) {
+                list.add(array[i]);
+            }
+        }
+        return list;
+    }
+
     public void change1() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             mBtn1.setBackground(getResources().getDrawable(R.drawable.groupchat2));
@@ -202,6 +337,10 @@ public class MainActivity extends AppCompatActivity {
 
             mRecyclerView.setVisibility(View.GONE);
             mMeRelative.setVisibility(View.GONE);
+
+            mChatRecyclerView.setVisibility(View.VISIBLE);
+
+            initData();
 
         }
     }
@@ -220,6 +359,7 @@ public class MainActivity extends AppCompatActivity {
 
             mRecyclerView.setVisibility(View.VISIBLE);
             mMeRelative.setVisibility(View.GONE);
+            mChatRecyclerView.setVisibility(View.GONE);
 
         }
     }
@@ -238,6 +378,7 @@ public class MainActivity extends AppCompatActivity {
 
             mRecyclerView.setVisibility(View.GONE);
             mMeRelative.setVisibility(View.GONE);
+            mChatRecyclerView.setVisibility(View.GONE);
 
         }
     }
@@ -256,6 +397,7 @@ public class MainActivity extends AppCompatActivity {
 
             mRecyclerView.setVisibility(View.GONE);
             mMeRelative.setVisibility(View.VISIBLE);
+            mChatRecyclerView.setVisibility(View.GONE);
 
         }
     }
@@ -282,7 +424,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             //添加到数据库
-            AddressDBService.getInstance().addAddress(this, contactId, name, "null", phone1);
+            AddressDBService.getInstance().addAddress(this, contactId, name, "密码", "个性签名", phone1);
 
             //记得要把cursor给close掉
             phoneCursor.close();

@@ -81,9 +81,11 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(mContext, "请先注册一个用户", Toast.LENGTH_SHORT).show();
         }
         boolean isExist = false;
+        String isExistId = "";
         for (int i = 0; i < list.size(); i++) {
             if (userName.equals(list.get(i).get("name")) && userPass.equals(list.get(i).get("pass"))) {
                 isExist = true;
+                isExistId = list.get(i).get("id");
             }
         }
 
@@ -94,6 +96,7 @@ public class LoginActivity extends AppCompatActivity {
             SharedPreferences teacherInfo = getSharedPreferences("user_info", MODE_PRIVATE);
             SharedPreferences.Editor editor = teacherInfo.edit();
             editor.putString("user_login_time", getLocalTime()); //更新登陆时间
+            editor.putString("user_id", isExistId); //更新登陆人
             editor.apply();
             finish();
         } else {

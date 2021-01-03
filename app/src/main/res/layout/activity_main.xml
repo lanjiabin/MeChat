@@ -8,6 +8,13 @@
 
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/chatRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="60dp"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -17,13 +24,76 @@
     <RelativeLayout
         android:id="@+id/me_relative"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp">
+
+        <RelativeLayout
+            android:id="@+id/me_relative2"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_marginTop="20dp">
+
+            <ImageView
+                android:id="@+id/head_iv"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_marginLeft="10dp"
+                android:src="@drawable/haad" />
+
+            <TextView
+                android:id="@+id/user_name_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="10dp"
+                android:layout_toRightOf="@+id/head_iv"
+                android:text="jiabinlan"
+                android:textColor="@android:color/black"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/phone_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="10dp"
+                android:layout_toRightOf="@+id/head_iv"
+                android:text="电话：177776106013" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/sign_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/me_relative2"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="20dp"
+            android:text="个性签名" />
+
+        <EditText
+            android:id="@+id/sign_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sign_tv"
+            android:layout_marginHorizontal="15dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/rectangle"
+            android:gravity="left|top"
+            android:minLines="3"
+            android:padding="5dp" />
 
         <Button
             android:id="@+id/cancel_login"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/sign_et"
             android:layout_centerInParent="true"
+            android:layout_marginHorizontal="15dp"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/holo_red_light"
             android:text="取消登陆" />
 
     </RelativeLayout>

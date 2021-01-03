@@ -5,12 +5,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.mechat.DB.AddressDBService;
 import com.android.mechat.DB.MsgDBService;
 
 import java.util.ArrayList;
@@ -25,6 +27,8 @@ public class MsgActivity extends AppCompatActivity {
     ArrayList<HashMap<String, String>> mMsgList;
     RecyclerView mMsgRecycler;
 
+    TextView mSend1; //收件人
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +42,7 @@ public class MsgActivity extends AppCompatActivity {
         mMsgEt = findViewById(R.id.msg_edit);
         mSendBtn = findViewById(R.id.send_btn);
         mMsgRecycler = findViewById(R.id.msg_recycler);
+        mSend1 = findViewById(R.id.send1);
         mMsgList = MsgDBService.getInstance().queryAllAddressMsg(this);
 
         if (mMsgList == null || mMsgList.size() <= 0) {
@@ -54,6 +59,8 @@ public class MsgActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String send1 = intent.getStringExtra("send1"); //收件人
         String send2 = intent.getStringExtra("send2"); //发件人
+        String name = AddressDBService.getInstance().queryAddressByID(getApplicationContext(), send1).get(0).get("name");
+        mSend1.setText(name); //收件人名字
         mMsgRecyclerAdapter = new MsgRecyclerAdapter(this, mMsgList, send1, send2);
         //数据更新
         mMsgRecyclerAdapter.notifyDataSetChanged();

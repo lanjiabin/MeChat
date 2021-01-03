@@ -16,7 +16,6 @@
             android:layout_height="30dp"
             android:background="@android:color/darker_gray"
             android:gravity="center"
-            android:text="大珍"
             android:textColor="@android:color/white" />
 
         <androidx.recyclerview.widget.RecyclerView

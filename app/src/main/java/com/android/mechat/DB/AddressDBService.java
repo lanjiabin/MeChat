@@ -44,18 +44,16 @@ public class AddressDBService {
 
 
     /**
-     * 3.更新一个联系人信息
+     * 3.更新一个联系人的签名
      **/
     public void updateAddressByID(Context context,
                                   String id,
-                                  String name,
-                                  String phone) {
+                                  String sign) {
         MusicDBManager musicDBManager = new MusicDBManager(context);
         DBHelper helper = new DBHelper(context);
-        String sql = "UPDATE address SET name=?,phone=? WHERE id=?";
+        String sql = "UPDATE address SET sign=? WHERE id=?";
         musicDBManager.updateSQLite(sql, new String[]{
-                name,
-                phone,
+                sign,
                 id});
     }
 
@@ -67,8 +65,9 @@ public class AddressDBService {
                            String id,
                            String name,
                            String pass,
+                           String sign,
                            String phone) {
-        String sql = "INSERT INTO address(id,name,pass,phone) VALUES(?,?,?,?)";
+        String sql = "INSERT INTO address(id,name,pass,sign,phone) VALUES(?,?,?,?,?)";
         MusicDBManager musicDBManager = new MusicDBManager(context);
         DBHelper helper = new DBHelper(context);
 
@@ -76,6 +75,7 @@ public class AddressDBService {
                 id,
                 name,
                 pass,
+                sign,
                 phone});
     }
 

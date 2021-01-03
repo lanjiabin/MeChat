@@ -22,6 +22,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 "(id VARCHAR PRIMARY KEY," +  //联系人id
                 "name VARCHAR," +             //联系人名字
                 "pass VARCHAR," +             //联系人密码
+                "sign VARCHAR," +             //个性签名
                 "phone VARCHAR)");            //联系人电话号码
 
 

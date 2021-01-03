@@ -13,7 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.android.mechat.DB.AddressDBService;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * 注册
@@ -73,7 +75,7 @@ public class RegisterActivity extends AppCompatActivity {
             editor.putString("user_id", String.valueOf(id)); //注册id
             editor.apply();
 
-            AddressDBService.getInstance().addAddress(this, String.valueOf(id), registerName, registerPass, registerPhone);
+            AddressDBService.getInstance().addAddress(this, String.valueOf(id), registerName, registerPass, "个性签名", registerPhone);
             Toast.makeText(mContext, registerName + " 注册成功", Toast.LENGTH_LONG).show();
             finish();
         } else {
