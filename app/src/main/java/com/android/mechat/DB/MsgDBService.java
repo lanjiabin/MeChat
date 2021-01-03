@@ -46,11 +46,11 @@ public class MsgDBService {
         DBHelper helper = new DBHelper(context);
 
         musicDBManager.updateSQLite(sql, new String[]{
-                getLocalTime(),
+                getLocalTime() + "-",
                 send1,
                 send2,
                 msg,
-                getLocalTime() + "-"});
+                getLocalTime()});
     }
 
     //获得本系统的时间
